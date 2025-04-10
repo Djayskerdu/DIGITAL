@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offline Mobile Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        input, textarea, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            box-sizing: border-box; /* Ensures padding doesn't overflow */
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        h2 {
+            text-align: center;
+        }
+        /* Make form elements responsive */
+        @media screen and (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            button {
+                font-size: 18px;
+                padding: 12px;
+            }
+        }
+    </style>
+    
+</head>
+<body>
+
+<h2>Offline Form</h2>
+<p>Fill out this form, and the data will sync once you’re online again.</p>
+
+<form id="offlineForm">
+    <label for="fullName">Full Name:</label>
+    <input type="text" id="fullName" name="fullName" required><br><br>
+
+    <label for="lifegroupLeader">Lifegroup Leader:</label>
+    <input type="text" id="lifegroupLeader" name="lifegroupLeader" required><br><br>
+
+    <button type="submit">Submit</button>
+</form>
+
+<script>
+    document.getElementById('offlineForm').addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        // Capture form data
+        let formData = {
+            fullName: document.getElementById('fullName').value,
+            lifegroupLeader: document.getElementById('lifegroupLeader').value
+        };
+
+        // If the user is online, submit the form to Google Sheets via the Apps Script URL
+        if (navigator.onLine) {
+            fetch('YOUR_GOOGLE_SCRIPT_URL', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())  // Parse the JSON response
+            .then(data => alert("Data submitted successfully!"))
+            .catch(error => alert("Error submitting data: " + error));
+        } else {
+            // If offline, store data in localStorage and sync later
+            let offlineData = JSON.parse(localStorage.getItem('offlineData')) || [];
+            offlineData.push(formData);
+            localStorage.setItem('offlineData', JSON.stringify(offlineData));
+            alert('Form submitted offline, will sync once online!');
+        }
+    });
+</script>
+
+</body>
+</html>
