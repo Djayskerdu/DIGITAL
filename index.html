@@ -3,54 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Offline Mobile Form</title>
+    <title>Offline Form</title>
     <style>
         body {
             font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 600px;
+            margin: 20px auto;
             padding: 20px;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
-        input, textarea, button {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            box-sizing: border-box; /* Ensures padding doesn't overflow */
-        }
-        button {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
+
         h2 {
             text-align: center;
+            margin-bottom: 20px;
         }
-        /* Make form elements responsive */
-        @media screen and (max-width: 600px) {
-            body {
-                padding: 10px;
-            }
-            button {
-                font-size: 18px;
-                padding: 12px;
-            }
+
+        label {
+            font-size: 16px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .alert {
+            padding: 10px;
+            margin-top: 20px;
+            background-color: #f44336;
+            color: white;
+            text-align: center;
+            border-radius: 4px;
         }
     </style>
-    
 </head>
 <body>
 
-<h2>Offline Form</h2>
-<p>Fill out this form, and the data will sync once you’re online again.</p>
+<div class="container">
+    <h2>Offline Form</h2>
+    <p>Fill out this form, and the data will sync once you’re online again.</p>
 
-<form id="offlineForm">
-    <label for="fullName">Full Name:</label>
-    <input type="text" id="fullName" name="fullName" required><br><br>
+    <form id="offlineForm">
+        <label for="fullName">Full Name:</label>
+        <input type="text" id="fullName" name="fullName" required><br>
 
-    <label for="lifegroupLeader">Lifegroup Leader:</label>
-    <input type="text" id="lifegroupLeader" name="lifegroupLeader" required><br><br>
+        <label for="lifegroupLeader">Lifegroup Leader:</label>
+        <input type="text" id="lifegroupLeader" name="lifegroupLeader" required><br>
 
-    <button type="submit">Submit</button>
-</form>
+        <button type="submit">Submit</button>
+    </form>
+
+    <div id="alert" class="alert" style="display: none;"></div>
+</div>
 
 <script>
     document.getElementById('offlineForm').addEventListener('submit', function (event) {
@@ -62,22 +95,37 @@
             lifegroupLeader: document.getElementById('lifegroupLeader').value
         };
 
-        // If the user is online, submit the form to Google Sheets via the Apps Script URL
+        // Show the alert div if there is an issue
+        const alertDiv = document.getElementById('alert');
+
+        // If the user is online, send the data to Google Sheets via Apps Script
         if (navigator.onLine) {
-            fetch('YOUR_GOOGLE_SCRIPT_URL', {
+            fetch('https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json'
+                },
                 body: JSON.stringify(formData)
             })
-            .then(response => response.json())  // Parse the JSON response
-            .then(data => alert("Data submitted successfully!"))
-            .catch(error => alert("Error submitting data: " + error));
+            .then(response => response.json())
+            .then(data => {
+                alertDiv.style.display = 'none';
+                alert("Data submitted successfully!");
+                document.getElementById('offlineForm').reset(); // Reset form after submission
+            })
+            .catch(error => {
+                alertDiv.style.display = 'block';
+                alertDiv.textContent = "Error submitting data: " + error.message;
+            });
         } else {
             // If offline, store data in localStorage and sync later
             let offlineData = JSON.parse(localStorage.getItem('offlineData')) || [];
             offlineData.push(formData);
             localStorage.setItem('offlineData', JSON.stringify(offlineData));
-            alert('Form submitted offline, will sync once online!');
+
+            alertDiv.style.display = 'block';
+            alertDiv.textContent = 'Form submitted offline, will sync once online!';
+            document.getElementById('offlineForm').reset(); // Reset form after submission
         }
     });
 </script>
