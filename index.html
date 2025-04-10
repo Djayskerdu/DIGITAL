@@ -97,9 +97,9 @@
   
         const alertDiv = document.getElementById('alert');
   
-        // If online, submit data to Google Sheets
+        // Check if online
         if (navigator.onLine) {
-            fetch('https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec', {
+            fetch('https://script.google.com/macros/s/AKfycbwEaMr3SySJWk6iJe2_qBeCMM3YmKRR56kzmEGKN4w/dev', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -117,7 +117,7 @@
                 alertDiv.textContent = "Error submitting data: " + error.message;
             });
         } else {
-            // If offline, store data in localStorage and sync later
+            // If offline, store data in localStorage
             let offlineData = JSON.parse(localStorage.getItem('offlineData')) || [];
             offlineData.push(formData);
             localStorage.setItem('offlineData', JSON.stringify(offlineData));
@@ -129,8 +129,5 @@
     });
   </script>
   
-
-
-
 </body>
 </html>
