@@ -88,16 +88,16 @@
 <script>
     document.getElementById('offlineForm').addEventListener('submit', function (event) {
         event.preventDefault();
-
+  
         // Capture form data
         let formData = {
             fullName: document.getElementById('fullName').value,
             lifegroupLeader: document.getElementById('lifegroupLeader').value
         };
-
+  
         const alertDiv = document.getElementById('alert');
-
-        // Check if the user is online
+  
+        // If online, submit data to Google Sheets
         if (navigator.onLine) {
             fetch('https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec', {
                 method: 'POST',
@@ -121,13 +121,14 @@
             let offlineData = JSON.parse(localStorage.getItem('offlineData')) || [];
             offlineData.push(formData);
             localStorage.setItem('offlineData', JSON.stringify(offlineData));
-
+  
             alertDiv.style.display = 'block';
             alertDiv.textContent = 'Form submitted offline, will sync once online!';
             document.getElementById('offlineForm').reset(); // Reset form after submission
         }
     });
-</script>
+  </script>
+  
 
 
 
